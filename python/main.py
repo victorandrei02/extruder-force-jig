@@ -1,22 +1,11 @@
-# pyFirmata test
-import tkinter as tk
-from pyfirmata import Arduino
+import serial
+import time
+import struct
 
-# Functions
-def pingArdu():
-    return
+arduino = serial.Serial(port="COM3", baudrate=115200, timeout=0.5)
 
-# Board connected to COM3
-board = Arduino("COM3")
-
-# Initializing tkinter window
-win = tk.Tk()
-win.title("pyFirmata Test")
-win.minsize(200, 60)
-
-# Label widget
-label = tk.Label(win, text="Click to ping Arduino")
-label.grid(column=1, row=1)
-
-# Button widget
-PINGbtn = tk.Button(win, bd=4, text = "PING", command=pingArdu)
+while True:
+    value = arduino.read(4)
+    if len(value) > 0:
+        [printvalue] = struct.unpack('f', value)
+        print(printvalue)

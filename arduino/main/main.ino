@@ -23,21 +23,24 @@ const unsigned int hx_dt = 6;
 // Defining state names
 enum {notReady, isReady};
 unsigned char scaleState = notReady;
+float measurement;
 
+void sendFloat(float f) {
+  byte * b = (byte *) &f;
+  Serial.write(b, 4);
+  Serial.flush();
+  return;
+}
 
 void setup() {
-
   Serial.begin(115200); // 115200 baud rate, can be changed
-
-  Serial.println("Simple HX711 Load Cell Serial Plotter");
-  scale.begin(hx_dt, hx_sck); // Initializing HX711 chip
-
-  Serial.println("Taring cell in 3s...");
-  delay(3000);
-  scale.tare(); // Taring the cell
-  delay(1000);
+  scale.begin(hx_dt, hx_sck); //initializing scale
   scale.set_raw_mode(); // Ensure cell is running in average mode
 
+  delay(1000);
+
+  scale.tare(); //taring after startup
+  
 }
 
 void loop() {
@@ -56,8 +59,9 @@ void loop() {
 
     case isReady:
       float measurement = scale.get_value();
-      Serial.print("M:");
-      Serial.println(measurement);
+      if (Serial.availableForWrite()) {
+        sendFloat(measurement);
+      }
       scaleState = notReady;
       break;
   }
